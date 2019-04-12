@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset = "utf-8">
+
+    <title>My Parse App</title>
+    
+    <script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.3.1.min.js"></script>
+	<script type="text/javascript" src="https://npmcdn.com/parse/dist/parse.min.js"></script>
+</head>
+<body>
+        <div id="info">
+            <span id="id"></span>
+            <input type="button" value="LOGOUT" onclick="logout()">
+            <input type="button", value="GAME PLAY", onclick="move()">
+            
+        </div>
+
+        <h3> Collect Click Position Log </h3>
+
+        <div id="log"></div>
+        <div id="gslog"></div>
+
+	<script type="text/javascript">
+		Parse.initialize("choi");
+		Parse.serverURL="https://choi19test.herokuapp.com/parse"
+
+        function move() {
+            window.location = "index.html";
+        }
+        
+
+        $(document).ready(function(){
+            if(!Parse.User.current()){
+                alert("Please after Login");
+                window.location = "signin.html"
+            }
+            else {
+                $("#id").html("Welcome! " + Parse.User.current().get("username")+ " ");
+                var ClickPosition = Parse.Object.extend("ClickPosition");
+                var query = new ClickPosition();
+
+                
+
+                
+
+                
+
+                query.find()
+                .then((List) => {
+                    var dataStr = "";
+                    for(index in list){
+                        var posStr = "X : " + list[index].get("posX") + " "+ "Y : "+ 
+                        list[index].get("posY")
+                        dataStr = dataStr + posStr + " save success <br>";
+                    }
+                    $("#log").html(dataStr);
+                })
+            }
+        });
+
+        function logout() {
+            Parse.User.logOut();
+            window.location = "signin.html";
+        }
+
+        function savePositionLog(posX, posY){
+            var posStr = "X : " + posX + " " + "Y : " + posY
+            var ClickPosition = Parse.Object.extend("ClickPosition");
+            var position = new ClickPosition();
+            position.setACL(new Parse.ACL(Parse.User.current()));
+            position.set("PosX", posX);
+            position.set("PosY", posY);
+
+            position.save()
+            .then((data) => {
+                $("#log").html($("#log").html() + posStr + " save success <br>");
+            }, (error) => {
+                $("#log").html($("#log").html() + posStr + " save error : " +
+                error.message + "<br>")
+            });
+        }
+
+        $(document).on("click", function(data){
+            savePositionLog(data.pageX, data.pageY);
+        });
+      
+	</script>
+</body>
+</html>
